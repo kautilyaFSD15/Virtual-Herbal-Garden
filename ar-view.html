@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AR Plant Viewer</title>
+
+    <!-- A-Frame Core -->
+    <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+
+    <style>
+      html, body { margin: 0; height: 100%; overflow: hidden; font-family: sans-serif; }
+      #overlay {
+        position: fixed;
+        top: 10px;
+        left: 10px;
+        z-index: 10;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      button {
+        padding: 12px 18px;
+        font-size: 16px;
+        border: none;
+        border-radius: 8px;
+        background: green;
+        color: white;
+        cursor: pointer;
+        transition: background 0.3s ease;
+      }
+      button:hover {
+        background: darkgreen;
+      }
+      button:disabled {
+        background: grey;
+        cursor: not-allowed;
+      }
+      #plantNameDisplay {
+        background: rgba(0,0,0,0.7);
+        padding: 10px 15px;
+        border-radius: 8px;
+        color: white;
+        font-size: 1.2em;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="overlay">
+      <div id="plantNameDisplay">Loading Plant...</div>
+      <button id="startAR" style="display:block;">Start AR 🌿</button>
+      <button id="placeButton" style="display:none;" disabled>Place Plant 🌱</button>
+    </div>
+
+    <a-scene
+      vr-mode-ui="enabled: false"
+      embedded
+      renderer="colorManagement: true; physicallyCorrectLights;"
+      webxr="optionalFeatures: hit-test, dom-overlay, local-floor; overlayElement: #overlay;"
+      device-orientation-permission-ui="enabled: true;"
+    >
+      <a-entity light="type: directional; intensity: 1;" position="1 3 2"></a-entity>
+      <a-entity light="type: ambient; intensity: 0.6"></a-entity>
+
+      <!-- Reticle -->
+      <a-entity
+        id="reticle"
+        visible="false"
+        geometry="primitive: ring; radiusInner: 0.04; radiusOuter: 0.05;"
+        material="color: lime; shader: flat;"
+        rotation="-90 0 0"
+      ></a-entity>
+
+      <!-- Dynamically loaded Plant Model -->
+      <a-entity
+        id="arPlantModel"
+        visible="false"
+        gltf-model=""
+      ></a-entity>
+
+      <a-camera position="0 1.6 0"></a-camera>
+    </a-scene>
+
+    <script>
+      const startARBtn = document.getElementById("startAR");
+      const placeBtn = document.getElementById("placeButton");
+      const scene = document.querySelector("a-scene");
+      const reticle = document.getElementById("reticle");
+      const arPlantModel = document.getElementById("arPlantModel");
+      const plantNameDisplay = document.getElementById("plantNameDisplay");
+
+      let xrHitTestSource = null;
+      let xrSession = null;
+      let xrRefSpace = null;
+
+      // Get plant data from URL parameters
+      const urlParams = new URLSearchParams(window.location.search);
+      const plantName = urlParams.get('plant') || 'Unknown Plant';
+      const modelUrl = urlParams.get('model');
+      const scale = urlParams.get('scale') || "0.5 0.5 0.5"; // Default scale if not provided
+
+      document.addEventListener('DOMContentLoaded', () => {
+          plantNameDisplay.textContent = `Viewing: ${plantName}`;
+          if (modelUrl) {
+              arPlantModel.setAttribute("gltf-model", modelUrl);
+              arPlantModel.setAttribute("scale", scale); // Apply the scale here
+              placeBtn.disabled = false; // Enable place button once model is loaded
+          } else {
+              plantNameDisplay.textContent = "Error: No plant model specified.";
+              startARBtn.disabled = true;
+          }
+      });
+
+      startARBtn.onclick = async () => {
+        if (!modelUrl) {
+            alert("No plant model available to view in AR.");
+            return;
+        }
+        if (!navigator.xr) {
+          alert("WebXR not supported on this browser.");
+          return;
+        }
+
+        const supported = await navigator.xr.isSessionSupported("immersive-ar");
+        if (!supported) {
+          alert("AR not supported on this device.");
+          return;
+        }
+
+        try {
+            xrSession = await navigator.xr.requestSession("immersive-ar", {
+              requiredFeatures: ["hit-test", "local-floor"],
+              optionalFeatures: ["dom-overlay"],
+              domOverlay: { root: document.body },
+            });
+
+            scene.renderer.xr.setSession(xrSession);
+
+            xrRefSpace = await xrSession.requestReferenceSpace("local-floor");
+            const viewerSpace = await xrSession.requestReferenceSpace("viewer");
+            xrHitTestSource = await xrSession.requestHitTestSource({ space: viewerSpace });
+
+            xrSession.addEventListener("end", () => {
+              xrHitTestSource = null;
+              xrSession = null;
+              startARBtn.style.display = "block";
+              placeBtn.style.display = "none";
+              arPlantModel.setAttribute("visible", "false"); // Hide plant when AR ends
+              reticle.setAttribute("visible", "false"); // Hide reticle when AR ends
+            });
+
+            startARBtn.style.display = "none";
+            placeBtn.style.display = "inline-block";
+
+            xrSession.requestAnimationFrame(onXRFrame);
+        } catch (error) {
+            alert("Failed to start AR session: " + error.message);
+            console.error("AR Session Error:", error);
+            startARBtn.style.display = "block";
+            placeBtn.style.display = "none";
+        }
+      };
+
+      function onXRFrame(time, frame) {
+        if (!xrSession) return;
+        const session = xrSession;
+        session.requestAnimationFrame(onXRFrame);
+
+        if (!xrHitTestSource) return;
+
+        const hitTestResults = frame.getHitTestResults(xrHitTestSource);
+        if (hitTestResults.length > 0) {
+          const hitPose = hitTestResults[0].getPose(xrRefSpace);
+          if (!hitPose) return;
+
+          reticle.visible = true;
+          reticle.object3D.position.set(
+            hitPose.transform.position.x,
+            hitPose.transform.position.y,
+            hitPose.transform.position.z
+          );
+          reticle.object3D.quaternion.set(
+            hitPose.transform.orientation.x,
+            hitPose.transform.orientation.y,
+            hitPose.transform.orientation.z,
+            hitPose.transform.orientation.w
+          );
+        } else {
+          reticle.visible = false;
+        }
+      }
+
+      placeBtn.onclick = () => {
+        if (!reticle.visible) {
+          alert("Move your phone to find a surface first!");
+          return;
+        }
+        if (!modelUrl) {
+            alert("No plant model selected to place!");
+            return;
+        }
+        const pos = reticle.getAttribute("position");
+        arPlantModel.setAttribute("position", pos);
+        arPlantModel.setAttribute("visible", "true");
+        // Optionally hide the reticle after placing
+        // reticle.setAttribute("visible", "false");
+      };
+    </script>
+  </body>
+</html>

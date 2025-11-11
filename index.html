@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🌿 Climate-wise Plant Database</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --primary-green:#7fff00;--dark-bg:rgba(0,0,0,0.85);
+  --dark-bg-light:rgba(0,0,0,0.7);--text-color:#fff;--accent-color:#a1ff4d;
+}
+body{
+  margin:0;font-family:'Poppins',sans-serif;
+  background:url('https://images.unsplash.com/photo-1501004318641-b39e6451bec6?q=80&w=1920&h=1080&fit=crop') no-repeat center/cover fixed;
+  color:var(--text-color);display:flex;flex-direction:column;align-items:center;padding:20px;min-height:100vh;
+}
+header{background:var(--dark-bg);padding:20px 40px;text-align:center;border-radius:12px;
+  box-shadow:0 4px 20px rgba(0,0,0,.5);margin-bottom:30px;width:100%;max-width:1000px;}
+header h1{font-size:2.8em;color:var(--primary-green);text-shadow:0 0 10px rgba(127,255,0,.5);}
+.weather-box{
+  background:var(--dark-bg-light);padding:25px;text-align:center;border-radius:12px;
+  width:100%;max-width:450px;box-shadow:0 4px 15px rgba(0,0,0,.4);margin-bottom:25px;
+}
+.weather-box input{
+  width:80%;padding:12px;margin-bottom:10px;border-radius:8px;border:1px solid rgba(255,255,255,.3);
+  background:rgba(255,255,255,.1);color:var(--text-color);
+}
+.weather-box button{
+  padding:12px 25px;border:none;background:var(--primary-green);color:#000;
+  font-weight:700;border-radius:8px;cursor:pointer;font-size:1.1em;
+}
+.plant-list{display:flex;flex-wrap:wrap;justify-content:center;gap:25px;max-width:1200px;}
+.plant{background:var(--dark-bg-light);border-radius:12px;padding:25px;width:280px;
+  text-align:center;transition:.3s all;box-shadow:0 4px 12px rgba(0,0,0,.3);}
+.plant:hover{transform:translateY(-5px);background:var(--dark-bg);}
+.plant h3{color:var(--primary-green);font-size:1.5em;}
+.plant p{font-size:1em;margin-bottom:10px;}
+.ar-button{
+  display:inline-block;padding:10px 18px;border-radius:8px;background:var(--primary-green);
+  color:#000;font-weight:700;text-decoration:none;cursor:pointer;
+}
+.ar-button:hover{background:var(--accent-color);}
+#loadingSpinner{display:none;border:4px solid rgba(255,255,255,.3);
+  border-top:4px solid var(--primary-green);border-radius:50%;width:30px;height:30px;
+  animation:spin 1s linear infinite;margin:10px auto;}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<header>
+  <h1>🌿 Climate-wise Plant Database</h1>
+</header>
+
+<div class="weather-box">
+  <input id="cityInput" type="text" placeholder="Enter city name (e.g., Kanpur, India)">
+  <button onclick="getWeather()">Get Weather & Plants</button>
+  <div id="loadingSpinner"></div>
+  <div id="weatherResult"></div>
+</div>
+
+<div id="plantList" class="plant-list">
+  <div class="plant"><h3>Welcome!</h3><p>Enter a city to get climate-wise plant suggestions.</p></div>
+</div>
+
+<script>
+const apiKey="22163b8cddb205bf1ae045e60d2f5e18";
+const defaultCountry="IN";
+
+/* --- 83-plant database (only sample shown here; add the rest) --- */
+const plantDatabase={
+  "Aloe Vera":{desc:"Stores water in leaves; ideal for hot dry areas.",model:"./plants/aloe_vera_plant.glb",scale:"0.4 0.4 0.4"},
+  "Neem Tree":{desc:"Hardy medicinal tree thriving in Indian climates.",model:"./plants/neem_tree.glb",scale:"3.5 3.5 3.5"},
+  "Mango Tree":{desc:"Tropical fruit tree for warm humid regions.",model:"./plants/mango_tree.glb",scale:"3 3 3"},
+  "Coconut Palm":{desc:"Coastal palm for tropical, humid zones.",model:"./plants/coconut_tree_low_poly.glb",scale:"2.5 2.5 2.5"},
+  "Banana Plant":{desc:"Fast-growing plant loving humidity and heat.",model:"./plants/banana_plant.glb",scale:"1.8 1.8 1.8"},
+  "Bougainvillea":{desc:"Flowering vine for dry or semi-arid zones.",model:"./plants/bougainvillea_day_26.glb",scale:"1 1 1"},
+  "Rose":{desc:"Temperate flowering shrub preferring mild weather.",model:"./plants/rose_flower.glb",scale:"0.5 0.5 0.5"},
+  "Cactus":{desc:"True desert survivor needing minimal water.",model:"./plants/cactus.glb",scale:"0.5 0.5 0.5"},
+  "Tulsi":{desc:"Holy basil thriving in warm climates.",model:"./plants/tulsi_tree_on_a_cement_tub.glb",scale:"0.4 0.4 0.4"},
+  "Bamboo":{desc:"Humidity-loving fast-growing plant.",model:"./plants/bamboo.glb",scale:"2 2 2"},
+  "Coffee":{desc:"Tropical shrub requiring warmth & shade.",model:"./plants/coffee_plant_sasha_an.glb",scale:"1.2 1.2 1.2"},
+  "Apple Tree":{desc:"Prefers cool temperate hills.",model:"./plants/apple_tree.glb",scale:"3.5 3.5 3.5"},
+  "Pine":{desc:"Cold-region evergreen conifer.",model:"./plants/pine.glb",scale:"4 4 4"}
+  // add remaining .glb models in same format
+};
+
+/* --- Climate mapping --- */
+const groups={
+  desert:["Cactus","Aloe Vera","Bougainvillea"],
+  tropical:["Mango Tree","Coconut Palm","Banana Plant","Neem Tree"],
+  humid:["Bamboo","Banana Plant","Coffee","Mango Tree"],
+  temperate:["Rose","Tulsi","Apple Tree"],
+  cold:["Pine","Apple Tree","Rose"]
+};
+
+async function getWeather(){
+  const city=document.getElementById("cityInput").value.trim();
+  const resBox=document.getElementById("weatherResult");
+  const list=document.getElementById("plantList");
+  const spin=document.getElementById("loadingSpinner");
+  list.innerHTML="";resBox.innerHTML="";spin.style.display="block";
+  if(!city){resBox.innerHTML="<span style='color:red'>Enter city name.</span>";spin.style.display="none";return;}
+  try{
+    const r=await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)},${defaultCountry}&units=metric&appid=${apiKey}`);
+    const d=await r.json();
+    if(d.cod!==200){resBox.innerHTML="<span style='color:red'>City not found!</span>";spin.style.display="none";return;}
+    const {temp,humidity}=d.main,cond=d.weather[0].main.toLowerCase();
+    const cityName=d.name;
+    resBox.innerHTML=`<p>🌍 <b>${cityName}</b><br>🌡️ ${temp}°C 💧${humidity}% 🌤️ ${cond}</p>`;
+    let cat="temperate";
+    if(temp>=32||humidity<35)cat="desert";
+    else if(temp>=25&&humidity>=60)cat="tropical";
+    else if(humidity>75)cat="humid";
+    else if(temp<15)cat="cold";
+    showPlants(groups[cat]||groups.temperate);
+  }catch(e){
+    resBox.innerHTML="<span style='color:red'>Error fetching data.</span>";
+  }finally{spin.style.display="none";}
+}
+
+function showPlants(arr){
+  const list=document.getElementById("plantList");
+  list.innerHTML="";
+  arr.forEach(n=>{
+    const p=plantDatabase[n];if(!p)return;
+    const div=document.createElement("div");div.className="plant";
+    div.innerHTML=`
+      <h3>${n}</h3>
+      <p>${p.desc}</p>
+      <a class="ar-button" target="_blank"
+         href="ar-view.html?plant=${encodeURIComponent(n)}&model=${encodeURIComponent(p.model)}&scale=${encodeURIComponent(p.scale)}">
+         View in AR
+      </a>`;
+    list.appendChild(div);
+  });
+}
+</script>
+</body>
+</html>
