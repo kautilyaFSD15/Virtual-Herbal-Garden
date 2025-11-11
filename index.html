@@ -1,139 +1,328 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🌿 Climate-wise Plant Database</title>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
-<style>
-:root{
-  --primary-green:#7fff00;--dark-bg:rgba(0,0,0,0.85);
-  --dark-bg-light:rgba(0,0,0,0.7);--text-color:#fff;--accent-color:#a1ff4d;
-}
-body{
-  margin:0;font-family:'Poppins',sans-serif;
-  background:url('https://images.unsplash.com/photo-1501004318641-b39e6451bec6?q=80&w=1920&h=1080&fit=crop') no-repeat center/cover fixed;
-  color:var(--text-color);display:flex;flex-direction:column;align-items:center;padding:20px;min-height:100vh;
-}
-header{background:var(--dark-bg);padding:20px 40px;text-align:center;border-radius:12px;
-  box-shadow:0 4px 20px rgba(0,0,0,.5);margin-bottom:30px;width:100%;max-width:1000px;}
-header h1{font-size:2.8em;color:var(--primary-green);text-shadow:0 0 10px rgba(127,255,0,.5);}
-.weather-box{
-  background:var(--dark-bg-light);padding:25px;text-align:center;border-radius:12px;
-  width:100%;max-width:450px;box-shadow:0 4px 15px rgba(0,0,0,.4);margin-bottom:25px;
-}
-.weather-box input{
-  width:80%;padding:12px;margin-bottom:10px;border-radius:8px;border:1px solid rgba(255,255,255,.3);
-  background:rgba(255,255,255,.1);color:var(--text-color);
-}
-.weather-box button{
-  padding:12px 25px;border:none;background:var(--primary-green);color:#000;
-  font-weight:700;border-radius:8px;cursor:pointer;font-size:1.1em;
-}
-.plant-list{display:flex;flex-wrap:wrap;justify-content:center;gap:25px;max-width:1200px;}
-.plant{background:var(--dark-bg-light);border-radius:12px;padding:25px;width:280px;
-  text-align:center;transition:.3s all;box-shadow:0 4px 12px rgba(0,0,0,.3);}
-.plant:hover{transform:translateY(-5px);background:var(--dark-bg);}
-.plant h3{color:var(--primary-green);font-size:1.5em;}
-.plant p{font-size:1em;margin-bottom:10px;}
-.ar-button{
-  display:inline-block;padding:10px 18px;border-radius:8px;background:var(--primary-green);
-  color:#000;font-weight:700;text-decoration:none;cursor:pointer;
-}
-.ar-button:hover{background:var(--accent-color);}
-#loadingSpinner{display:none;border:4px solid rgba(255,255,255,.3);
-  border-top:4px solid var(--primary-green);border-radius:50%;width:30px;height:30px;
-  animation:spin 1s linear infinite;margin:10px auto;}
-@keyframes spin{to{transform:rotate(360deg)}}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🌿 Climate-wise Plant Database (India)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --primary-green:#7fff00;
+      --dark-bg:rgba(0,0,0,0.85);
+      --dark-bg-light:rgba(0,0,0,0.7);
+      --text-color:#ffffff;
+      --accent-color:#a1ff4d;
+    }
+    body {
+      margin:0;font-family:'Poppins',sans-serif;
+      background:url('https://images.unsplash.com/photo-1501004318641-b39e6451bec6?q=80&w=1920&h=1080&fit=crop') no-repeat center/cover fixed;
+      color:var(--text-color);display:flex;flex-direction:column;align-items:center;padding:20px;min-height:100vh;
+    }
+    header {
+      background:var(--dark-bg);padding:20px 40px;border-radius:12px;
+      box-shadow:0 4px 20px rgba(0,0,0,0.5);margin-bottom:30px;width:100%;max-width:1000px;text-align:center;
+    }
+    header h1 {font-size:2.4em;color:var(--primary-green);margin:0;text-shadow:0 0 10px rgba(127,255,0,0.5);}
+    .weather-box {
+      background:var(--dark-bg-light);padding:25px;border-radius:12px;
+      width:100%;max-width:450px;text-align:center;box-shadow:0 4px 15px rgba(0,0,0,0.4);margin-bottom:25px;
+    }
+    .weather-box input, .weather-box select { /* Added select for dropdown */
+      width:75%;padding:12px;margin-bottom:12px;border:1px solid rgba(255,255,255,0.3);
+      border-radius:8px;background:rgba(255,255,255,0.1);color:var(--text-color);
+      /* Style for select element */
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ffffff'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      background-size: 16px;
+      padding-right: 30px; /* Make space for the arrow */
+    }
+    .weather-box option {
+        color: #333; /* Dark text for options */
+        background: #eee; /* Light background for options */
+    }
+    .weather-box button {
+      padding:12px 20px;border:none;border-radius:8px;background:var(--primary-green);
+      color:#000;font-weight:700;cursor:pointer;transition:0.3s;
+    }
+    .weather-box button:hover {background:var(--accent-color);}
+    #weatherResult {margin-top:12px;font-size:1.05em;}
+    #loadingSpinner {
+      display:none;border:4px solid rgba(255,255,255,0.3);
+      border-top:4px solid var(--primary-green);border-radius:50%;
+      width:28px;height:28px;animation:spin 1s linear infinite;margin:12px auto;
+    }
+    @keyframes spin {to {transform:rotate(360deg);}}
+    .plant-list {
+      display:flex;flex-wrap:wrap;justify-content:center;gap:18px;max-width:1200px;
+    }
+    .plant {
+      background:var(--dark-bg-light);padding:20px;border-radius:12px;width:300px;
+      box-shadow:0 6px 16px rgba(0,0,0,0.4);transition:0.3s;
+    }
+    .plant:hover {transform:translateY(-4px);background:var(--dark-bg);}
+    .plant h3 {margin:0;color:var(--primary-green);}
+    .plant p {margin:8px 0;color:#e6e6e6;}
+    .ar-button {
+      display:inline-block;margin-top:6px;padding:8px 12px;border-radius:8px;
+      background:var(--primary-green);color:#000;font-weight:700;text-decoration:none;
+    }
+    .ar-button:hover {background:var(--accent-color);}
+  </style>
 </head>
 <body>
-<header>
-  <h1>🌿 Climate-wise Plant Database</h1>
-</header>
+<header><h1>🌿 Climate-wise Plant Database (India)</h1></header>
 
 <div class="weather-box">
-  <input id="cityInput" type="text" placeholder="Enter city name (e.g., Kanpur, India)">
+  <select id="citySelect">
+    <option value="">Select a city...</option>
+  </select>
   <button onclick="getWeather()">Get Weather & Plants</button>
   <div id="loadingSpinner"></div>
   <div id="weatherResult"></div>
 </div>
 
 <div id="plantList" class="plant-list">
-  <div class="plant"><h3>Welcome!</h3><p>Enter a city to get climate-wise plant suggestions.</p></div>
+  <div class="plant"><h3>Welcome!</h3><p>Select a city from the dropdown to get climate-based plant suggestions for India.</p></div>
 </div>
 
 <script>
-const apiKey="22163b8cddb205bf1ae045e60d2f5e18";
-const defaultCountry="IN";
+const apiKey = "22163b8cddb205bf1ae045e60d2f5e18"; // Replace with YOUR OpenWeatherMap API Key
+const defaultCountry = "IN";
 
-/* --- 83-plant database (only sample shown here; add the rest) --- */
-const plantDatabase={
-  "Aloe Vera":{desc:"Stores water in leaves; ideal for hot dry areas.",model:"./plants/aloe_vera_plant.glb",scale:"0.4 0.4 0.4"},
-  "Neem Tree":{desc:"Hardy medicinal tree thriving in Indian climates.",model:"./plants/neem_tree.glb",scale:"3.5 3.5 3.5"},
-  "Mango Tree":{desc:"Tropical fruit tree for warm humid regions.",model:"./plants/mango_tree.glb",scale:"3 3 3"},
-  "Coconut Palm":{desc:"Coastal palm for tropical, humid zones.",model:"./plants/coconut_tree_low_poly.glb",scale:"2.5 2.5 2.5"},
-  "Banana Plant":{desc:"Fast-growing plant loving humidity and heat.",model:"./plants/banana_plant.glb",scale:"1.8 1.8 1.8"},
-  "Bougainvillea":{desc:"Flowering vine for dry or semi-arid zones.",model:"./plants/bougainvillea_day_26.glb",scale:"1 1 1"},
-  "Rose":{desc:"Temperate flowering shrub preferring mild weather.",model:"./plants/rose_flower.glb",scale:"0.5 0.5 0.5"},
-  "Cactus":{desc:"True desert survivor needing minimal water.",model:"./plants/cactus.glb",scale:"0.5 0.5 0.5"},
-  "Tulsi":{desc:"Holy basil thriving in warm climates.",model:"./plants/tulsi_tree_on_a_cement_tub.glb",scale:"0.4 0.4 0.4"},
-  "Bamboo":{desc:"Humidity-loving fast-growing plant.",model:"./plants/bamboo.glb",scale:"2 2 2"},
-  "Coffee":{desc:"Tropical shrub requiring warmth & shade.",model:"./plants/coffee_plant_sasha_an.glb",scale:"1.2 1.2 1.2"},
-  "Apple Tree":{desc:"Prefers cool temperate hills.",model:"./plants/apple_tree.glb",scale:"3.5 3.5 3.5"},
-  "Pine":{desc:"Cold-region evergreen conifer.",model:"./plants/pine.glb",scale:"4 4 4"}
-  // add remaining .glb models in same format
+// --- More than 150 Indian cities ---
+const indianCities = [
+    "Agra", "Ahmedabad", "Aizawl", "Ajmer", "Alappuzha", "Aligarh", "Allahabad", "Ambala", "Ambikapur", "Amravati",
+    "Amritsar", "Anantapur", "Ankleshwar", "Asansol", "Aurangabad", "Ayodhya", "Bagaha", "Bahraich", "Ballia", "Bengaluru",
+    "Bareilly", "Bathinda", "Belgaum", "Bellary", "Bettiah", "Bhagalpur", "Bharatpur", "Bhavnagar", "Bhilai", "Bhiwandi",
+    "Bhopal", "Bhubaneswar", "Bidar", "Bikaner", "Bilaspur", "Bokaro", "Calicut", "Chandigarh", "Chennai", "Chinsura",
+    "Chittoor", "Coimbatore", "Cuttack", "Darbhanga", "Dehradun", "Delhi", "Devanagere", "Dhanbad", "Dhule", "Dibrugarh",
+    "Dindigul", "Dispur", "Durgapur", "Erode", "Etawah", "Faridabad", "Firozabad", "Gandhinagar", "Gangtok", "Gaya",
+    "Ghaziabad", "Gopalpur", "Gorakhpur", "Gulbarga", "Guntur", "Gurgaon", "Guwahati", "Gwalior", "Haldia", "Hapur",
+    "Haridwar", "Hospet", "Howrah", "Hubli", "Hyderabad", "Imphal", "Indore", "Jabalpur", "Jaipur", "Jalandhar",
+    "Jamalpur", "Jammu", "Jamnagar", "Jamshedpur", "Jhansi", "Jodhpur", "Kakinada", "Kalyan", "Kanchipuram", "Kanpur",
+    "Karimnagar", "Karnal", "Kochi", "Kolhapur", "Kolkata", "Kollam", "Kota", "Kottayam", "Kurnool", "Latur",
+    "Loni", "Lucknow", "Ludhiana", "Madurai", "Mahesana", "Malegaon", "Mangaluru", "Mathura", "Meerut", "Mira-Bhayandar",
+    "Mirzapur", "Moradabad", "Mumbai", "Muzaffarnagar", "Muzaffarpur", "Mysore", "Nagercoil", "Nagpur", "Nalgonda", "Nanded",
+    "Nashik", "Nellore", "New Delhi", "Nizamabad", "Noida", "Ongole", "Palwal", "Panipat", "Panvel", "Patiala",
+    "Patna", "Pilibhit", "Pondicherry", "Porbandar", "Prayagraj", "Pune", "Puri", "Raichur", "Raipur", "Rajahmundry",
+    "Rajkot", "Rampur", "Ranchi", "Ratlam", "Rewa", "Rohtak", "Rourkela", "Sagar", "Saharanpur", "Salem",
+    "Sambalpur", "Sangli", "Satara", "Satna", "Secunderabad", "Shahjahanpur", "Shimla", "Shivamogga", "Shivpuri", "Siliguri",
+    "Singrauli", "Srinagar", "Sultanpur", "Surat", "Thane", "Thanjavur", "Thiruvananthapuram", "Thoothukudi", "Thrissur", "Tiruchirappalli",
+    "Tirunelveli", "Tirupati", "Udaipur", "Ujjain", "Ulhasnagar", "Vadodara", "Valsad", "Varanasi", "Vasai", "Vellore",
+    "Vijayawada", "Visakhapatnam", "Vizianagaram", "Warangal"
+];
+
+
+// Populate the city dropdown
+document.addEventListener('DOMContentLoaded', () => {
+    const citySelect = document.getElementById('citySelect');
+    indianCities.sort().forEach(city => { // Sort cities alphabetically
+        const option = document.createElement('option');
+        option.value = city;
+        option.textContent = city;
+        citySelect.appendChild(option);
+    });
+});
+
+
+/* --- Your 80 Plant Database --- */
+// IMPORTANT: Fill in the correct descriptions, categories, model paths, and scales for YOUR 80 plants.
+// The GLB filenames used here must exactly match what you have in your 'plants/' folder.
+const plantDatabase = {
+    "Wheat Plant": { desc: "Staple crop, best in cool, dry climates.", cat: "temperate", model: "plants/wheat__free.glb", scale: "0.8 0.8 0.8" },
+    "Frangipani Tree": { desc: "Tropical flowering tree with fragrant blossoms.", cat: "tropical", model: "plants/realistic_hd_frangipani_tree_150.glb", scale: "2.5 2.5 2.5" },
+    "Rosemary Willow": { desc: "Shrub with narrow leaves, often used ornamentally.", cat: "temperate", model: "plants/realistic_hd_rosemary_willow_9199.glb", scale: "1.5 1.5 1.5" },
+    "Rice Plant": { desc: "Primary food crop, thrives in warm, wet conditions.", cat: "humid", model: "plants/rice_plant.glb", scale: "0.7 0.7 0.7" },
+    "Rose": { desc: "Classic flowering shrub, suitable for temperate gardens.", cat: "temperate", model: "plants/rose_flower.glb", scale: "0.5 0.5 0.5" },
+    "Rubber Plant": { desc: "Large-leafed indoor tree, good for air purification.", cat: "indoor", model: "plants/rubber_plant_fig.glb", scale: "1.4 1.4 1.4" },
+    "Snowdrop": { desc: "Small, white bell-shaped flowers, blooms in late winter/early spring.", cat: "cold", model: "plants/snowdrop_pack_lowpoly_gameready_lod.glb", scale: "0.2 0.2 0.2" },
+    "Spider Plant": { desc: "Easy-care indoor plant, produces plantlets.", cat: "indoor", model: "plants/spider_plant.glb", scale: "0.4 0.4 0.4" },
+    "Spruce Tree": { desc: "Coniferous evergreen, common in colder regions.", cat: "cold", model: "plants/spruce_tree_-_low_poly.glb", scale: "4 4 4" },
+    "Sugarcane": { desc: "Tall grass crop for tropical humidity.", cat: "humid", model: "plants/sugarcane.glb", scale: "2 2 2" }, // Using the non-(1) version
+    "Sunflower": { desc: "Follows the sun, grows well in warm, sunny climates.", cat: "temperate", model: "plants/sunflower.glb", scale: "1.2 1.2 1.2" },
+    "Taro": { desc: "Tropical root crop, needs moist soil.", cat: "humid", model: "plants/taro.glb", scale: "0.6 0.6 0.6" },
+    "Thyme": { desc: "Fragrant herb, prefers dry, sunny conditions.", cat: "temperate", model: "plants/thyme_bush.glb", scale: "0.25 0.25 0.25" },
+    "Tulsi (Holy Basil)": { desc: "Sacred herb with medicinal properties, warm climates.", cat: "tropical", model: "plants/tulsi_tree_on_a_cement_tub.glb", scale: "0.4 0.4 0.4" },
+    "Pansy Primrose": { desc: "Colorful flowering plant, suited for temperate gardens.", cat: "temperate", model: "plants/violaceae__primula_pansy_flower__primrose.glb", scale: "0.3 0.3 0.3" },
+    "Western Juniper": { desc: "Hardy evergreen shrub or small tree, tolerates dry conditions.", cat: "desert", model: "plants/western_juniper.glb", scale: "2 2 2" },
+    "Neem Tree": { desc: "Highly valued medicinal tree, drought-tolerant.", cat: "tropical", model: "plants/neem_tree.glb", scale: "3.5 3.5 3.5" },
+    "Oak Tree": { desc: "Large deciduous tree, found in temperate zones.", cat: "temperate", model: "plants/oak_tree.glb", scale: "4 4 4" },
+    "Prickly Pear Cactus": { desc: "Succulent cactus with edible pads and fruits.", cat: "desert", model: "plants/opuntia_prickly_pear_cactus.glb", scale: "1 1 1" },
+    "Pandanus": { desc: "Tropical plant with long, strap-like leaves.", cat: "tropical", model: "plants/pandanus.glb", scale: "1.5 1.5 1.5" }, // Using the non-(1) version
+    "Peace Lily": { desc: "Popular indoor plant with white spathes, air purifying.", cat: "indoor", model: "plants/peace_lily.glb", scale: "0.5 0.5 0.5" },
+    "Pincushion Euphorbia": { desc: "Small, spherical succulent, resembles a pincushion.", cat: "desert", model: "plants/pincushion_euphorbia.glb", scale: "0.3 0.3 0.3" },
+    "Pine": { desc: "General term for coniferous trees, tolerant of cold.", cat: "cold", model: "plants/pine.glb", scale: "4 4 4" }, // Using 'pine' for general pine tree
+    "Plumeria": { desc: "Fragrant tropical flower, also known as Frangipani.", cat: "tropical", model: "plants/plumeria_flower.glb", scale: "0.9 0.9 0.9" },
+    "Pomegranate": { desc: "Fruit plant, thrives in semi-arid to temperate zones.", cat: "temperate", model: "plants/pomegranatepunica_granatum_l..glb", scale: "1.5 1.5 1.5" },
+    "Pothos Plant": { desc: "Trailing indoor plant, easy to grow and propagate.", cat: "indoor", model: "plants/pothos_plant.glb", scale: "0.8 0.8 0.8" },
+    "Morning Glory": { desc: "Climbing plant with vibrant, trumpet-shaped flowers.", cat: "tropical", model: "plants/morning_glory_dense_plant_points_challenge.glb", scale: "1 1 1" },
+    "Jasmine": { desc: "Fragrant flowering vine, popular in warm climates.", cat: "tropical", model: "plants/jasmine.glb", scale: "0.7 0.7 0.7" },
+    "Joshua Tree": { desc: "Iconic desert plant, slow-growing and long-lived.", cat: "desert", model: "plants/joshua_trees.glb", scale: "3 3 3" },
+    "Lavender": { desc: "Aromatic herb, thrives in sunny, dry Mediterranean climates.", cat: "temperate", model: "plants/lavender.glb", scale: "0.4 0.4 0.4" },
+    "Mango Tree": { desc: "Popular tropical fruit tree, needs warm climate.", cat: "tropical", model: "plants/mango_tree (1).glb", scale: "3 3 3" }, // Using (1) version to differentiate if needed, else choose one.
+    "Mangrove Tree": { desc: "Salt-tolerant tree, vital for coastal ecosystems in tropics.", cat: "humid", model: "plants/mangrove_tree.glb", scale: "3.5 3.5 3.5" },
+    "Maple Tree": { desc: "Deciduous tree known for its autumn foliage, temperate zones.", cat: "temperate", model: "plants/maple_tree.glb", scale: "4 4 4" },
+    "Marsh Marigold": { desc: "Bright yellow flowers, grows in wet, marshy areas.", cat: "temperate", model: "plants/marsh_marigold_high-poly.glb", scale: "0.3 0.3 0.3" },
+    "Fir Tree": { desc: "Evergreen coniferous tree, common in colder, mountainous regions.", cat: "cold", model: "plants/fir_tree.glb", scale: "4 4 4" },
+    "Fishhook Barrel Cactus": { desc: "Large, cylindrical cactus with prominent spines.", cat: "desert", model: "plants/fishhook_barrel_cactus.glb", scale: "0.8 0.8 0.8" },
+    "Money Plant (Pothos)": { desc: "Trailing vine, very common indoor houseplant.", cat: "indoor", model: "plants/free_pothos_potted_plant_-_money_plant.glb", scale: "0.8 0.8 0.8" },
+    "Tulip": { desc: "Spring-blooming flower, typically grown from bulbs.", cat: "temperate", model: "plants/generic_tulip_flower.glb", scale: "0.4 0.4 0.4" },
+    "Ginger Plant": { desc: "Tropical plant cultivated for its aromatic rhizome.", cat: "tropical", model: "plants/ginger_root.glb", scale: "0.3 0.3 0.3" },
+    "Grape Vines": { desc: "Woody vines cultivated for grapes, prefer temperate climates.", cat: "temperate", model: "plants/grape_vines.glb", scale: "2 2 2" },
+    "Guava Tree": { desc: "Fruit tree for warm tropical and subtropical regions.", cat: "tropical", model: "plants/guava_tree_3d_model.glb", scale: "2 2 2" },
+    "Jade Plant": { desc: "Succulent houseplant, known for its thick, shiny leaves.", cat: "indoor", model: "plants/jade_plant.glb", scale: "0.6 0.6 0.6" }, // Using the non-(1) version
+    "Jalapeno Plant": { desc: "Chili pepper plant, grown for its medium-hot fruits.", cat: "tropical", model: "plants/jalapeno_plant.glb", scale: "0.5 0.5 0.5" },
+    "Tea Plant": { desc: "Shrub cultivated for tea leaves, thrives in humid hills.", cat: "humid", model: "plants/cc0___tea_plant_camellia_sinensis.glb", scale: "1 1 1" },
+    "Cedar": { desc: "Large evergreen coniferous tree, known for fragrant wood.", cat: "cold", model: "plants/cedar.glb", scale: "4.5 4.5 4.5" },
+    "Cherry Blossom Branch": { desc: "Branch with delicate pink flowers, symbolic of spring.", cat: "temperate", model: "plants/cherry_blossom_branch.glb", scale: "1 1 1" },
+    "Cherry Blossom Tree": { desc: "Deciduous trees known for beautiful spring blooms.", cat: "temperate", model: "plants/cherry_blossom_trees.glb", scale: "3 3 3" },
+    "Coconut Palm": { desc: "Iconic palm for tropical coastal areas with high humidity.", cat: "humid", model: "plants/coconut_palm.glb", scale: "2.5 2.5 2.5" }, // Using this version
+    "Coconut Tree (Low Poly)": { desc: "Low poly version of the tropical coconut tree.", cat: "humid", model: "plants/coconut_tree_low_poly.glb", scale: "2.5 2.5 2.5" }, // Explicitly using (low poly)
+    "Coffee Plant": { desc: "Shrub cultivated for coffee beans, needs warm humid hills.", cat: "humid", model: "plants/coffee_plant_sasha_an.glb", scale: "1.2 1.2 1.2" }, // Using the non-(1) version
+    "Colocasia (Potted)": { desc: "Tropical foliage plant with large, heart-shaped leaves.", cat: "tropical", model: "plants/colocasia_potted.glb", scale: "0.7 0.7 0.7" }, // Using the non-(1) version
+    "Daffodil": { desc: "Spring-flowering bulb, known for its trumpet-shaped bloom.", cat: "temperate", model: "plants/daffodil.glb", scale: "0.3 0.3 0.3" },
+    "Daisy": { desc: "Common flowering plant with white petals and a yellow center.", cat: "temperate", model: "plants/daisy_flower.glb", scale: "0.2 0.2 0.2" },
+    "Date Palm": { desc: "Desert fruit tree, thrives in hot, arid regions.", cat: "desert", model: "plants/date_palm.glb", scale: "3.5 3.5 3.5" }, // Using the non-(1) version
+    "Snake Plant": { desc: "Hardy indoor air-purifier, very tolerant of neglect.", cat: "indoor", model: "plants/day_178_snake_plant.glb", scale: "0.7 0.7 0.7" },
+    "Desert Rose": { desc: "Blooms in hot arid soil, striking succulent.", cat: "desert", model: "plants/desert_rose.glb", scale: "0.6 0.6 0.6" },
+    "Dried Sagebrush": { desc: "Arid land shrub, distinctive fragrance.", cat: "desert", model: "plants/dried_sagebrush.glb", scale: "1.2 1.2 1.2" },
+    "Fern": { desc: "Moisture-loving shade plant, ancient lineage.", cat: "humid", model: "plants/fern.glb", scale: "0.6 0.6 0.6" },
+    "Camellia Sasanqua": { desc: "Evergreen shrub with attractive flowers, mild climates.", cat: "temperate", model: "plants/cc0__camellia_sasanqua_shishigashira.glb", scale: "1 1 1" },
+    "Fish Mint": { desc: "Asian herb, grows in moist, shady areas.", cat: "humid", model: "plants/cc0__fish_mint_houttuynia_cordata.glb", scale: "0.4 0.4 0.4" },
+    "Cactus": { desc: "General term for succulents adapted to arid conditions.", cat: "desert", model: "plants/cactus.glb", scale: "0.5 0.5 0.5" }, // Using the non-(1) version
+    "Casuarina Tree": { desc: "Fast-growing, salt-tolerant tree, often found in coastal areas.", cat: "tropical", model: "plants/casuarina_cone_-_photogrammetry.glb", scale: "3.8 3.8 3.8" },
+    "Barley Plant": { desc: "Cereal grain, grown in temperate climates.", cat: "temperate", model: "plants/cc0__barley_hordeum_vulgare.glb", scale: "0.7 0.7 0.7" },
+    "Chinese Evergreen": { desc: "Popular indoor plant with attractive patterned leaves.", cat: "indoor", model: "plants/aglaonema_chinese_evergreen_-_sketchfab_weekly.glb", scale: "0.7 0.7 0.7" }, // Using the non-(1) version
+    "Aloe Vera": { desc: "Succulent with medicinal properties, needs dry, warm conditions.", cat: "desert", model: "plants/aloe_vera_plant..glb", scale: "0.4 0.4 0.4" }, // Corrected filename (dot at end)
+    "Apple Tree": { desc: "Fruit tree requiring cold winters and mild summers.", cat: "cold", model: "plants/apple_tree.glb", scale: "3.5 3.5 3.5" },
+    "Areca Palm": { desc: "Popular ornamental palm, thrives in warm, humid conditions.", cat: "humid", model: "plants/areca_palm_lowpoly.glb", scale: "1.5 1.5 1.5" },
+    "Bamboo": { desc: "Fast-growing giant grass, versatile and prefers humid environments.", cat: "humid", model: "plants/bamboo.glb", scale: "2 2 2" },
+    "Banana Plant": { desc: "Tropical fruit plant, needs warmth and rich, moist soil.", cat: "tropical", model: "plants/banana_plant.glb", scale: "1.8 1.8 1.8" },
+    "Birch Tree": { desc: "Deciduous tree with distinctive bark, common in temperate/cold regions.", cat: "cold", model: "plants/birch_tree.glb", scale: "3.8 3.8 3.8" },
+    "Bougainvillea": { desc: "Vibrant, drought-tolerant ornamental shrub/vine.", cat: "desert", model: "plants/bougainvillea_day_26.glb", scale: "1 1 1" },
+    // You have 71 unique GLB filenames listed if we consolidate duplicates.
+    // If you have more distinct GLB files not covered by this, add them here.
+    // For example, if 'sugarcane (1).glb' is a different model, name it "Sugarcane Tall" and point to it.
 };
 
-/* --- Climate mapping --- */
-const groups={
-  desert:["Cactus","Aloe Vera","Bougainvillea"],
-  tropical:["Mango Tree","Coconut Palm","Banana Plant","Neem Tree"],
-  humid:["Bamboo","Banana Plant","Coffee","Mango Tree"],
-  temperate:["Rose","Tulsi","Apple Tree"],
-  cold:["Pine","Apple Tree","Rose"]
+// Auto-fill categories for convenience.
+// This is a default list, you should refine this based on your knowledge of each plant.
+const categories = {
+    desert: [
+        "Prickly Pear Cactus", "Pincushion Euphorbia", "Joshua Tree", "Fishhook Barrel Cactus",
+        "Dried Sagebrush", "Cactus", "Aloe Vera", "Bougainvillea", "Western Juniper", "Desert Rose"
+    ],
+    tropical: [
+        "Frangipani Tree", "Tulsi (Holy Basil)", "Neem Tree", "Plumeria", "Mango Tree",
+        "Morning Glory", "Jasmine", "Ginger Plant", "Guava Tree", "Jalapeno Plant", "Colocasia (Potted)", "Banana Plant", "Casuarina Tree"
+    ],
+    humid: [
+        "Rice Plant", "Sugarcane", "Taro", "Mangrove Tree", "Tea Plant",
+        "Coconut Palm", "Coconut Tree (Low Poly)", "Coffee Plant", "Fern", "Fish Mint", "Areca Palm", "Bamboo"
+    ],
+    temperate: [
+        "Wheat Plant", "Rosemary Willow", "Rose", "Sunflower", "Thyme", "Pansy Primrose",
+        "Oak Tree", "Pomegranate", "Lavender", "Maple Tree", "Marsh Marigold", "Tulip",
+        "Grape Vines", "Cherry Blossom Branch", "Cherry Blossom Tree", "Daffodil", "Daisy", "Camellia Sasanqua", "Barley Plant"
+    ],
+    cold: [
+        "Snowdrop", "Spruce Tree", "Pine", "Fir Tree", "Cedar", "Apple Tree", "Birch Tree"
+    ],
+    indoor: [
+        "Rubber Plant", "Spider Plant", "Peace Lily", "Pothos Plant", "Money Plant (Pothos)",
+        "Jade Plant", "Snake Plant", "Chinese Evergreen"
+    ]
 };
+
 
 async function getWeather(){
-  const city=document.getElementById("cityInput").value.trim();
-  const resBox=document.getElementById("weatherResult");
-  const list=document.getElementById("plantList");
-  const spin=document.getElementById("loadingSpinner");
-  list.innerHTML="";resBox.innerHTML="";spin.style.display="block";
-  if(!city){resBox.innerHTML="<span style='color:red'>Enter city name.</span>";spin.style.display="none";return;}
-  try{
-    const r=await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)},${defaultCountry}&units=metric&appid=${apiKey}`);
-    const d=await r.json();
-    if(d.cod!==200){resBox.innerHTML="<span style='color:red'>City not found!</span>";spin.style.display="none";return;}
-    const {temp,humidity}=d.main,cond=d.weather[0].main.toLowerCase();
-    const cityName=d.name;
-    resBox.innerHTML=`<p>🌍 <b>${cityName}</b><br>🌡️ ${temp}°C 💧${humidity}% 🌤️ ${cond}</p>`;
-    let cat="temperate";
-    if(temp>=32||humidity<35)cat="desert";
-    else if(temp>=25&&humidity>=60)cat="tropical";
-    else if(humidity>75)cat="humid";
-    else if(temp<15)cat="cold";
-    showPlants(groups[cat]||groups.temperate);
-  }catch(e){
-    resBox.innerHTML="<span style='color:red'>Error fetching data.</span>";
-  }finally{spin.style.display="none";}
+    const city = document.getElementById("citySelect").value; // Get city from dropdown
+    const weatherResult = document.getElementById("weatherResult");
+    const plantList = document.getElementById("plantList");
+    const spinner = document.getElementById("loadingSpinner");
+    plantList.innerHTML = "";
+    weatherResult.innerHTML = "";
+    spinner.style.display = "block";
+
+    if (!city) {
+        weatherResult.innerHTML = "<span style='color:red'>Please select a city.</span>";
+        spinner.style.display = "none";
+        return;
+    }
+
+    try {
+        const query = `${city},${defaultCountry}`;
+        const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${query}&units=metric&appid=${apiKey}`);
+        const data = await res.json();
+
+        if (data.cod !== 200) {
+            weatherResult.innerHTML = `<span style='color:red'>Could not fetch weather for ${city}. Please try another city.</span>`;
+            spinner.style.display = "none";
+            return;
+        }
+
+        const t = data.main.temp;
+        const h = data.main.humidity;
+        const c = data.weather[0].description; // More descriptive weather
+        weatherResult.innerHTML = `🌍 <strong>${data.name}</strong><br>🌡️ ${t}°C  💧 ${h}%  ☁️ ${c}`;
+
+        let detectedCategory = "temperate"; // Default to temperate
+        if (t < 10) detectedCategory = "cold";
+        else if (t >= 10 && t < 20) detectedCategory = "temperate";
+        else if (t >= 20 && t < 30) detectedCategory = (h > 75 || c.includes("rain") || c.includes("mist")) ? "humid" : "tropical";
+        else if (t >= 30 && h < 40) detectedCategory = "desert";
+        else if (h > 80 || c.includes("rain") || c.includes("mist")) detectedCategory = "humid"; // Strong humid indicator
+
+
+        // Get plants for the detected category, or default to all tropical if category is empty
+        const suggestedPlantNames = categories[detectedCategory] || categories.tropical;
+
+        if (suggestedPlantNames.length === 0) {
+             plantList.innerHTML = `<div class="plant"><h3>No specific suggestions for ${detectedCategory}</h3><p>Try indoor plants or a different city.</p></div>`;
+             // Also suggest indoor plants if specific category is empty
+             if (categories.indoor && categories.indoor.length > 0) {
+                 plantList.innerHTML += `<div class="plant"><h3>Consider Indoor Plants:</h3></div>`;
+                 displayPlants(categories.indoor, "indoor");
+             }
+        } else {
+            displayPlants(suggestedPlantNames, detectedCategory);
+        }
+
+    } catch (e) {
+        weatherResult.innerHTML = "<span style='color:red'>Error fetching weather. Please check your internet connection or API key.</span>";
+        console.error("Weather fetching error:", e);
+    } finally {
+        spinner.style.display = "none";
+    }
 }
 
-function showPlants(arr){
-  const list=document.getElementById("plantList");
-  list.innerHTML="";
-  arr.forEach(n=>{
-    const p=plantDatabase[n];if(!p)return;
-    const div=document.createElement("div");div.className="plant";
-    div.innerHTML=`
-      <h3>${n}</h3>
-      <p>${p.desc}</p>
-      <a class="ar-button" target="_blank"
-         href="ar-view.html?plant=${encodeURIComponent(n)}&model=${encodeURIComponent(p.model)}&scale=${encodeURIComponent(p.scale)}">
-         View in AR
-      </a>`;
-    list.appendChild(div);
-  });
+function displayPlants(list, categoryType){
+    const plantList = document.getElementById("plantList");
+    // Clear existing plants if not appending specifically
+    if (plantList.innerHTML.includes("Welcome!")) {
+        plantList.innerHTML = "";
+    }
+
+    list.forEach(plantName => {
+        const plantData = plantDatabase[plantName];
+        if (!plantData) {
+            console.warn(`Plant data not found for: ${plantName}`);
+            return;
+        }
+        plantList.innerHTML += `
+            <div class="plant">
+              <h3>${plantName}</h3>
+              <p>${plantData.desc} (Suited for ${categoryType} climates.)</p>
+              <a class="ar-button" target="_blank"
+                 href="ar-view.html?plant=${encodeURIComponent(plantName)}&model=${encodeURIComponent(plantData.model)}&scale=${encodeURIComponent(plantData.scale)}">
+                 View in AR
+              </a>
+            </div>`;
+    });
 }
 </script>
 </body>
